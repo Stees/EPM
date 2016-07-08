@@ -1,0 +1,177 @@
+#! /usr/bin/env python
+#This code will plot extinction spectra from multiple calculations and data from literature on one plot.
+
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import readline
+import time
+import math
+
+
+#turn on tab completion, and remove '-' from the list of delimiters as cp2k uses tabs in file names
+readline.parse_and_bind("tab: complete")
+readline.set_completer_delims(readline.get_completer_delims().replace('-',''))
+
+#find all instances of qtable in the directory
+os.system('find -name "qtable" -printf "%h\n" > locations.dat')
+os.system('find -name "qtable" > qtableLocations.dat')
+
+#get the locations into the code
+locationsFile = open('locations.dat','r')
+Lines = locationsFile.readlines()
+locationsFile.close()
+os.system('rm locations.dat')
+
+#get the full file paths into the code
+qtablePathsFile = open('qtableLocations.dat','r')
+qtableLines = qtablePathsFile.readlines()
+qtablePathsFile.close()
+os.system('rm qtableLocations.dat')
+
+#show the user which directories - aka calculations - are available to plot
+print('The following calculations are available:\n')
+time.sleep(1)
+for j, line in enumerate(Lines):
+    print('{0}: {1}'.format(j,line))
+
+time.sleep(1)
+
+#determine which calculations the user would like to plot
+print('\nEnter the numbers corresponding to the calculations you would like to plot, separated by spaces.\n')
+numbers = raw_input('For example: 0 3 4\n')
+numberList = np.unique(np.array([int(s) for s in numbers.split() if s.isdigit()]))
+
+#now determine if data in the literatureData directory needs to be plotted, and get an input which corresponds to the data files.
+controller = 0
+while (controller != 1):
+    inputRequiredController = raw_input('\n\nDo data sets from the literature need to be plotted? (y/n)\n')
+    if (inputRequiredController == 'n'):
+        controller = 1
+        totalDataSets = len(numberList)
+    elif (inputRequiredController == 'y'):
+        controller = 1
+        #now the data file names in the literatureData directory must be output to the screen
+        os.system('ls ~/testDDSCAT/literatureData/ > literatureDataFiles.dat')
+        litDatFile = open('literatureDataFiles.dat','r')
+        litDatLines = litDatFile.readlines()
+        litDatFile.close()
+        os.system('rm literatureDataFiles.dat')
+        print('\nData for the following calculations are available:\n')
+        time.sleep(1)
+        for i, line in enumerate(litDatLines):
+            print('{0}: {1}'.format(i,line))
+        time.sleep(1)
+        
+        #now, determine which of these calculations the user would like to add to the plot
+        print('\nEnter the numbers corresponding to the calculations you would like to plot, separated by spaces.\n')
+        litNumbers = raw_input('For example: 0 1\n')
+        litNumList = np.unique(np.array([int(s) for s in litNumbers.split() if s.isdigit()]))
+
+        #what is the total number of data sets?
+        totalDataSets = len(numberList) + len(litNumList)
+        
+    else:
+        time.sleep(2)
+        print('\n\n\nInvalid entry, please try again.\n')
+        time.sleep(1)
+
+
+#create variable to hold the effective radius of geometry used in the calculation, and a second variable to hold the labels for the data sets
+effectiveRadiusList = np.array([])
+dataSetLabels = np.array([])
+
+#now that the literature and calculated data locations have been selected by the user, the next step is to get the data corresponding to the locations the user indicated with his/her numerical input. First, do the data resulting from calculations. This will be easier than literature data, which may require the file format to be changed.
+
+#for each number corresponding to a calculation data file the user entered, identify the data file, open it, and save the data in a list in the empty list. Also save the name of the parent directory of the data to be used as a plot label. Further, save the effective radius of the data
+
+#initialize count so there will not be a crash if no calculation data is selected
+count = -1
+
+#create an array to hold the colors of the lines so they can be plotted automatically with matching colors
+colorArray = np.array([])
+
+for count, p in enumerate(numberList):
+    #make temp arrays to hold data
+    tempArrayWave = np.array([])
+    tempArrayExt = np.array([])
+    dataSetLabels = np.append(dataSetLabels, Lines[int(p)].rsplit('/',1)[1][:-1])
+    tempFile = open(qtableLines[int(p)].replace("\n",''),'r')
+    tempLines = tempFile.readlines()
+    tempFile.close()
+    for kount, line in enumerate(tempLines):
+        if kount > 13:
+            if kount == 14:
+                effectiveRadiusList = np.append(effectiveRadiusList,float(line.split()[0]))
+            tempArrayWave = np.append(tempArrayWave,float(line.split()[1]))
+            tempArrayExt = np.append(tempArrayExt,float(line.split()[2]))
+    colorHolder, = plt.plot(tempArrayWave*1000,tempArrayExt*3*math.pow(10,6)/4/effectiveRadiusList[count],label=dataSetLabels[count])
+
+    #save the color of the plot
+    colorArray = np.append(colorArray, colorHolder.get_color())
+
+#now it is time to add the literature data to the plot
+for dCount, P in enumerate(litNumList):
+    tempWaveArray = np.array([])
+    tempExtArray = np.array([])
+    #print('{0}'.format(litNumList))
+    #print('{0}'.format(litDatLines[int(P)][:-1]))
+    dataSetLabels = np.append(dataSetLabels, litDatLines[int(P)][:-1].replace('.xls',''))
+    fileName = 'literatureData/' + litDatLines[int(P)][:-1]
+    #print('{0}'.format(fileName))
+
+    #get the effective radius of the calculation
+    #future capability: add the ability to handle several units! Add them as needed
+    #if litDatLines[int(P)].rsplit
+    effectiveRadiusList = np.append(effectiveRadiusList,float(litDatLines[int(P)].rsplit('_')[2]))
+
+    #
+    tempFile = open(fileName,'r')
+    tempLines = tempFile.readlines()
+    tempFile.close()
+
+    #now determine if the file is in raw format from ImageJ, or if it has been processed already
+    #print('{0}'.format(tempLines[0]))
+    if (tempLines[0].split()[1] == 'Mean'):
+        
+        #The file is in raw format. It needs to be processed!
+        for jCount, line in enumerate(tempLines):
+            if (jCount > 0):
+                tempWaveArray = np.append(tempWaveArray, float(line.split()[5]))
+                tempExtArray = np.append(tempExtArray, float(line.split()[6]))
+        #print('{0}'.format(fileName.rsplit('.',1)[0]))
+        #now write the data to a new file of the same name,
+        newFile = open(fileName.rsplit('.',1)[0],'w')
+        #write an identifying line
+        newFile.write('converted file format\n')
+        for kCount, line in enumerate(tempWaveArray):
+            newFile.write('{0} {1}\n'.format(tempWaveArray[kCount],tempExtArray[kCount]))
+        newFile.close()
+
+        #now that the file has been rewritten into a new file, remove the original file
+        os.system('rm {0}'.format(fileName))
+        
+    elif (tempLines[0][:-1] == 'converted file format'):
+        #the file is in converted format
+        for jCount, line in enumerate(tempLines):
+            if (jCount > 0):
+                tempWaveArray = np.append(tempWaveArray, line.split()[0])
+                tempExtArray = np.append(tempExtArray, line.split()[1])
+    colorSuccess = 0
+    #determine if this data set is being plotted with a calculated data set of the same name. If so, match the colors
+    for kCounter, nameString in enumerate(dataSetLabels[:-1]):
+        if (dataSetLabels[dCount+count+1].rsplit('_',1)[0] == nameString):
+            plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1], marker='o', linestyle='none', color=colorArray[kCounter])
+            colorSuccess = 1
+    if (colorSuccess == 0):
+        plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1], marker='o', linestyle='none')
+        
+
+#finalize the plot!
+plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
+plt.xlabel('Wavelenth (nm)')
+plt.ylabel('Extinction Normalized to Volume (1/m)')
+plt.xlim(200,900)
+plt.legend()
+plt.savefig(plotTitle)
+plt.show()
