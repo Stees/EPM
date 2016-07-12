@@ -49,6 +49,7 @@ while (controller != 1):
     if (inputRequiredController == 'n'):
         controller = 1
         totalDataSets = len(numberList)
+        litNumList = np.array([])
     elif (inputRequiredController == 'y'):
         controller = 1
         #now the data file names in the literatureData directory must be output to the screen
