@@ -78,6 +78,27 @@ while (controller != 1):
         time.sleep(1)
 
 
+
+#make the plot have variable size
+owlControl = 2
+while (owlControl != 1 and owlControl != 3):
+    print('\nThe plot will be 3:4 by default. To change the dimensions, enter the number 3.\n ')
+    time.sleep(1)
+    tempVar = raw_input('Otherwise, enter the number 1.\n')
+    owlControl = int(tempVar)
+    if (owlControl != 1 and owlControl != 3):
+        print('\nPlease try again.\n')
+
+if (owlControl == 3):
+    width = int(raw_input('\nEnter width, inches.\n'))
+    height = int(raw_input('\nEnter height, inches.\n'))
+    plt.figure(figsize=(width,height))
+
+elif (owlControl == 1):
+    print('\nUsing default settings.\n')
+    plt.figure(figsize=(9,12))
+
+
 #create variable to hold the effective radius of geometry used in the calculation, and a second variable to hold the labels for the data sets
 effectiveRadiusList = np.array([])
 dataSetLabels = np.array([])
@@ -170,6 +191,7 @@ for dCount, P in enumerate(litNumList):
 
 #finalize the plot!
 plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
+    
 plt.xlabel('Wavelenth (nm)')
 plt.ylabel('Extinction Normalized to Volume (1/m)')
 plt.xlim(200,900)
