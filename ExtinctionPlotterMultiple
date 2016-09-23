@@ -77,28 +77,36 @@ while (controller != 1):
         print('\n\n\nInvalid entry, please try again.\n')
         time.sleep(1)
 
-
+#set the size of the tick marks
+plt.rc('xtick', labelsize=16)
+plt.rc('ytick', labelsize=16)
+        
 
 #make the plot have variable size
-owlControl = 2
-while (owlControl != 1 and owlControl != 3):
-    print('\nThe plot will be 3:4 by default. To change the dimensions, enter the number 3.\n ')
+owlControl = 0
+while (owlControl != 1 and owlControl != 2 and owlControl != 3):
+    print('\nThe plot will be square by default. For widescreen, enter the number 2.\n')
+    print('For double column widescreen, enter 3.\n')
     time.sleep(1)
     tempVar = raw_input('Otherwise, enter the number 1.\n')
     owlControl = int(tempVar)
-    if (owlControl != 1 and owlControl != 3):
+    if (owlControl != 1 and owlControl != 2 and owlControl != 3):
         print('\nPlease try again.\n')
+    if (owlControl == 0):
+        #widescreen
+        #width = int(raw_input('\nEnter width, inches.\n'))
+        #height = int(raw_input('\nEnter height, inches.\n'))
+        plt.figure(figsize=(16,9))
+    
+    elif (owlControl == 1):
+        print('\nUsing default settings.\n')
+        plt.figure(figsize=(12,12))
 
-if (owlControl == 3):
-    width = int(raw_input('\nEnter width, inches.\n'))
-    height = int(raw_input('\nEnter height, inches.\n'))
-    plt.figure(figsize=(width,height))
+    elif (owlControl == 3):
+        print('\nUsing double column widescreen.\n')
+        plt.figure(figsize=(8,9))
 
-elif (owlControl == 1):
-    print('\nUsing default settings.\n')
-    plt.figure(figsize=(9,12))
-
-
+    
 #create variable to hold the effective radius of geometry used in the calculation, and a second variable to hold the labels for the data sets
 effectiveRadiusList = np.array([])
 dataSetLabels = np.array([])
@@ -191,9 +199,8 @@ for dCount, P in enumerate(litNumList):
 
 #finalize the plot!
 plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
-    
-plt.xlabel('Wavelenth (nm)')
-plt.ylabel('Extinction Normalized to Volume (1/m)')
+plt.xlabel('Wavelenth (nm)', fontsize=16)
+plt.ylabel('Extinction Normalized to Volume (1/m)', fontsize=16)
 plt.xlim(200,900)
 plt.legend()
 plt.savefig(plotTitle)
