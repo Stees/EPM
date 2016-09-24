@@ -53,7 +53,7 @@ while (controller != 1):
     elif (inputRequiredController == 'y'):
         controller = 1
         #now the data file names in the literatureData directory must be output to the screen
-        os.system('ls ~/testDDSCAT/literatureData/ > literatureDataFiles.dat')
+        os.system('cd ~/testDDSCAT/literatureData/ && find . -type f > ~/testDDSCAT/literatureDataFiles.dat')
         litDatFile = open('literatureDataFiles.dat','r')
         litDatLines = litDatFile.readlines()
         litDatFile.close()
@@ -78,8 +78,8 @@ while (controller != 1):
         time.sleep(1)
 
 #set the size of the tick marks
-plt.rc('xtick', labelsize=20)
-plt.rc('ytick', labelsize=20)
+plt.rc('xtick', labelsize=18)
+plt.rc('ytick', labelsize=18)
         
 
 #make the plot have variable size
@@ -135,7 +135,7 @@ for count, p in enumerate(numberList):
                 effectiveRadiusList = np.append(effectiveRadiusList,float(line.split()[0]))
             tempArrayWave = np.append(tempArrayWave,float(line.split()[1]))
             tempArrayExt = np.append(tempArrayExt,float(line.split()[2]))
-    colorHolder, = plt.plot(tempArrayWave*1000,tempArrayExt*3*math.pow(10,6)/4/effectiveRadiusList[count],label=dataSetLabels[count])
+    colorHolder, = plt.plot(tempArrayWave*1000,tempArrayExt*3*math.pow(10,6)/4/effectiveRadiusList[count],label=dataSetLabels[count].replace('_',' ')+' Calc', linewidth=2.0)
 
     #save the color of the plot
     colorArray = np.append(colorArray, colorHolder.get_color())
@@ -153,7 +153,7 @@ for dCount, P in enumerate(litNumList):
     #get the effective radius of the calculation
     #future capability: add the ability to handle several units! Add them as needed
     #if litDatLines[int(P)].rsplit
-    effectiveRadiusList = np.append(effectiveRadiusList,float(litDatLines[int(P)].rsplit('_')[2]))
+    effectiveRadiusList = np.append(effectiveRadiusList,float(litDatLines[int(P)].rsplit('_')[1]))
 
     #
     tempFile = open(fileName,'r')
@@ -190,16 +190,16 @@ for dCount, P in enumerate(litNumList):
     colorSuccess = 0
     #determine if this data set is being plotted with a calculated data set of the same name. If so, match the colors
     for kCounter, nameString in enumerate(dataSetLabels[:-1]):
-        if (dataSetLabels[dCount+count+1].rsplit('_',1)[0] == nameString):
-            plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1], marker='o', linestyle='none', color=colorArray[kCounter])
+        if (dataSetLabels[dCount+count+1].rsplit('_',1)[0].rsplit('/',1)[1] == nameString):
+            plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1].rsplit('/',1)[1].rsplit('_',1)[0].replace('_',' ')+" Lit", marker='o', linestyle='none', markersize=10, color=colorArray[kCounter])
             colorSuccess = 1
     if (colorSuccess == 0):
-        plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1], marker='o', linestyle='none')
+        plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1].rsplit('/',1)[1]+" Lit", marker='o', markersize=10, linestyle='none')
         
 
 #finalize the plot!
 plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
-plt.xlabel('Wavelenth (nm)', fontsize=20)
+plt.xlabel('Wavelength (nm)', fontsize=20)
 plt.ylabel('Extinction Normalized to Volume (1/m)', fontsize=20)
 plt.xlim(200,900)
 plt.legend(prop={'size':18})
