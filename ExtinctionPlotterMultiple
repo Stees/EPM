@@ -53,7 +53,7 @@ while (controller != 1):
     elif (inputRequiredController == 'y'):
         controller = 1
         #now the data file names in the literatureData directory must be output to the screen
-        os.system('cd ~/testDDSCAT/literatureData/ && find . -type f > ~/testDDSCAT/literatureDataFiles.dat')
+        os.system('cd ~/extinctionCalculations/literatureData/ && find . -type f > ~/extinctionCalculations/literatureDataFiles.dat')
         litDatFile = open('literatureDataFiles.dat','r')
         litDatLines = litDatFile.readlines()
         litDatFile.close()
@@ -83,28 +83,25 @@ plt.rc('ytick', labelsize=18)
         
 
 #make the plot have variable size
-owlControl = 0
-while (owlControl != 1 and owlControl != 2 and owlControl != 3):
-    print('\nThe plot will be square by default. For widescreen, enter the number 2.\n')
-    print('For double column widescreen, enter 3.\n')
-    time.sleep(1)
-    tempVar = raw_input('Otherwise, enter the number 1.\n')
-    owlControl = int(tempVar)
-    if (owlControl != 1 and owlControl != 2 and owlControl != 3):
-        print('\nPlease try again.\n')
-    if (owlControl == 0):
-        #widescreen
-        #width = int(raw_input('\nEnter width, inches.\n'))
-        #height = int(raw_input('\nEnter height, inches.\n'))
-        plt.figure(figsize=(16,9))
+# owlControl = 0
+# while (owlControl != 1 and owlControl != 2 and owlControl != 3):
+#     print('\nThe plot will be square by default. For widescreen, enter the number 2.\n')
+#     print('For double column widescreen, enter 3.\n')
+#     time.sleep(1)
+#     tempVar = raw_input('Otherwise, enter the number 1.\n')
+#     owlControl = int(tempVar)
+#     if (owlControl != 1 and owlControl != 2 and owlControl != 3):
+#         print('\nPlease try again.\n')
+#     if (owlControl == 0):
+#         plt.figure(figsize=(16,9))
     
-    elif (owlControl == 1):
-        print('\nUsing default settings.\n')
-        plt.figure(figsize=(12,12))
+#     elif (owlControl == 1):
+#         print('\nUsing default settings.\n')
+#         plt.figure(figsize=(12,12))
 
-    elif (owlControl == 3):
-        print('\nUsing double column widescreen.\n')
-        plt.figure(figsize=(8,9))
+#     elif (owlControl == 3):
+#         print('\nUsing double column widescreen.\n')
+#         plt.figure(figsize=(8,9))
 
     
 #create variable to hold the effective radius of geometry used in the calculation, and a second variable to hold the labels for the data sets
@@ -144,24 +141,19 @@ for count, p in enumerate(numberList):
 for dCount, P in enumerate(litNumList):
     tempWaveArray = np.array([])
     tempExtArray = np.array([])
-    #print('{0}'.format(litNumList))
-    #print('{0}'.format(litDatLines[int(P)][:-1]))
     dataSetLabels = np.append(dataSetLabels, litDatLines[int(P)][:-1].replace('.xls',''))
     fileName = 'literatureData/' + litDatLines[int(P)][:-1]
-    #print('{0}'.format(fileName))
 
     #get the effective radius of the calculation
     #future capability: add the ability to handle several units! Add them as needed
     #if litDatLines[int(P)].rsplit
     effectiveRadiusList = np.append(effectiveRadiusList,float(litDatLines[int(P)].rsplit('_')[1]))
 
-    #
     tempFile = open(fileName,'r')
     tempLines = tempFile.readlines()
     tempFile.close()
 
     #now determine if the file is in raw format from ImageJ, or if it has been processed already
-    #print('{0}'.format(tempLines[0]))
     if (tempLines[0].split()[1] == 'Mean'):
         
         #The file is in raw format. It needs to be processed!
@@ -169,7 +161,6 @@ for dCount, P in enumerate(litNumList):
             if (jCount > 0):
                 tempWaveArray = np.append(tempWaveArray, float(line.split()[5]))
                 tempExtArray = np.append(tempExtArray, float(line.split()[6]))
-        #print('{0}'.format(fileName.rsplit('.',1)[0]))
         #now write the data to a new file of the same name,
         newFile = open(fileName.rsplit('.',1)[0],'w')
         #write an identifying line
@@ -189,9 +180,10 @@ for dCount, P in enumerate(litNumList):
                 tempExtArray = np.append(tempExtArray, line.split()[1])
     colorSuccess = 0
     #determine if this data set is being plotted with a calculated data set of the same name. If so, match the colors
+
     for kCounter, nameString in enumerate(dataSetLabels[:-1]):
         if (dataSetLabels[dCount+count+1].rsplit('_',1)[0].rsplit('/',1)[1] == nameString):
-            #plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1].rsplit('/',1)[1].rsplit('_',1)[0].replace('_',' ')+" Lit", marker='o', linestyle='none', markersize=10, color=colorArray[kCounter])
+            print('{0}'.format(dataSetLabels[dCount+count+1]))
             plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1].rsplit('/',1)[1].rsplit('_',1)[0].replace('_',' ').replace(' 2.41 nm','').replace(' 2.4 nm','')+", Literature", marker='o', linestyle='none', markersize=10, color=colorArray[kCounter])
             colorSuccess = 1
     if (colorSuccess == 0):
