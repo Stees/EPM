@@ -21,7 +21,7 @@ os.system('find -name "qtable" > qtableLocations.dat')
 locationsFile = open('locations.dat','r')
 Lines = locationsFile.readlines()
 locationsFile.close()
-os.system('rm locations.dat')
+#os.system('rm locations.dat')
 
 #get the full file paths into the code
 qtablePathsFile = open('qtableLocations.dat','r')
@@ -118,11 +118,12 @@ count = -1
 #create an array to hold the colors of the lines so they can be plotted automatically with matching colors
 colorArray = np.array([])
 
+#plot the calculated data
 for count, p in enumerate(numberList):
     #make temp arrays to hold data
     tempArrayWave = np.array([])
     tempArrayExt = np.array([])
-    dataSetLabels = np.append(dataSetLabels, Lines[int(p)].rsplit('/',1)[1][:-1])
+    dataSetLabels = np.append(dataSetLabels, Lines[int(p)])#.rsplit('/',1)[1][:-1])
     tempFile = open(qtableLines[int(p)].replace("\n",''),'r')
     tempLines = tempFile.readlines()
     tempFile.close()
@@ -194,7 +195,7 @@ for dCount, P in enumerate(litNumList):
 plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
 plt.xlabel('Wavelength (nm)', fontsize=20)
 plt.ylabel('Extinction Normalized to Volume (1/m)', fontsize=20)
-plt.xlim(200,900)
+plt.xlim(200,600)
 plt.legend(prop={'size':18})
 plt.savefig(plotTitle)
 plt.show()
