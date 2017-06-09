@@ -117,7 +117,7 @@ count = -1
 
 #create an array to hold the colors of the lines so they can be plotted automatically with matching colors
 colorArray = np.array([])
-
+kolor = np.array(['g','r','k'])
 #plot the calculated data
 for count, p in enumerate(numberList):
     #make temp arrays to hold data
@@ -133,7 +133,7 @@ for count, p in enumerate(numberList):
                 effectiveRadiusList = np.append(effectiveRadiusList,float(line.split()[0]))
             tempArrayWave = np.append(tempArrayWave,float(line.split()[1]))
             tempArrayExt = np.append(tempArrayExt,float(line.split()[2]))
-    colorHolder, = plt.plot(tempArrayWave*1000,tempArrayExt*3*math.pow(10,6)/4/effectiveRadiusList[count],label=dataSetLabels[count].replace('_',' ').replace(' 2.41 nm','').replace(' 2.4 nm','')+', Calculated', linewidth=2.0)
+    colorHolder, = plt.plot(tempArrayWave*1000,tempArrayExt*3*math.pow(10,6)/4/effectiveRadiusList[count],label=dataSetLabels[count].replace('_',' ').replace(' 2.41 nm','').replace(' 2.4 nm','')+', Calculated', linewidth=2.0, color=kolor[count])
 
     #save the color of the plot
     colorArray = np.append(colorArray, colorHolder.get_color())
@@ -182,6 +182,7 @@ for dCount, P in enumerate(litNumList):
     colorSuccess = 0
     #determine if this data set is being plotted with a calculated data set of the same name. If so, match the colors
 
+    # :-1 returns all except the last element
     for kCounter, nameString in enumerate(dataSetLabels[:-1]):
         if (dataSetLabels[dCount+count+1].rsplit('_',1)[0].rsplit('/',1)[1] == nameString):
             print('{0}'.format(dataSetLabels[dCount+count+1]))
@@ -195,7 +196,7 @@ for dCount, P in enumerate(litNumList):
 plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
 plt.xlabel('Wavelength (nm)', fontsize=20)
 plt.ylabel('Extinction Normalized to Volume (1/m)', fontsize=20)
-plt.xlim(200,600)
+plt.xlim(300,600)
 plt.legend(prop={'size':18})
 plt.savefig(plotTitle)
 plt.show()
