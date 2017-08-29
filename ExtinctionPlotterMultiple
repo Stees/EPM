@@ -8,40 +8,33 @@ import readline
 import time
 import math
 
-
 #turn on tab completion, and remove '-' from the list of delimiters as cp2k uses tabs in file names
 readline.parse_and_bind("tab: complete")
 readline.set_completer_delims(readline.get_completer_delims().replace('-',''))
-
+fix,ax = plt.subplots()
 #find all instances of qtable in the directory
 os.system('find -name "qtable" -printf "%h\n" > locations.dat')
 os.system('find -name "qtable" > qtableLocations.dat')
-
 #get the locations into the code
 locationsFile = open('locations.dat','r')
 Lines = locationsFile.readlines()
 locationsFile.close()
 #os.system('rm locations.dat')
-
 #get the full file paths into the code
 qtablePathsFile = open('qtableLocations.dat','r')
 qtableLines = qtablePathsFile.readlines()
 qtablePathsFile.close()
 os.system('rm qtableLocations.dat')
-
 #show the user which directories - aka calculations - are available to plot
 print('The following calculations are available:\n')
 time.sleep(1)
 for j, line in enumerate(Lines):
     print('{0}: {1}'.format(j,line))
-
 time.sleep(1)
-
 #determine which calculations the user would like to plot
 print('\nEnter the numbers corresponding to the calculations you would like to plot, separated by spaces.\n')
 numbers = raw_input('For example: 0 3 4\n')
 numberList = np.unique(np.array([int(s) for s in numbers.split() if s.isdigit()]))
-
 #now determine if data in the literatureData directory needs to be plotted, and get an input which corresponds to the data files.
 controller = 0
 while (controller != 1):
@@ -63,58 +56,26 @@ while (controller != 1):
         for i, line in enumerate(litDatLines):
             print('{0}: {1}'.format(i,line))
         time.sleep(1)
-        
         #now, determine which of these calculations the user would like to add to the plot
         print('\nEnter the numbers corresponding to the calculations you would like to plot, separated by spaces.\n')
         litNumbers = raw_input('For example: 0 1\n')
         litNumList = np.unique(np.array([int(s) for s in litNumbers.split() if s.isdigit()]))
-
         #what is the total number of data sets?
         totalDataSets = len(numberList) + len(litNumList)
-        
     else:
         time.sleep(2)
         print('\n\n\nInvalid entry, please try again.\n')
         time.sleep(1)
-
 #set the size of the tick marks
 plt.rc('xtick', labelsize=18)
 plt.rc('ytick', labelsize=18)
-        
-
-#make the plot have variable size
-# owlControl = 0
-# while (owlControl != 1 and owlControl != 2 and owlControl != 3):
-#     print('\nThe plot will be square by default. For widescreen, enter the number 2.\n')
-#     print('For double column widescreen, enter 3.\n')
-#     time.sleep(1)
-#     tempVar = raw_input('Otherwise, enter the number 1.\n')
-#     owlControl = int(tempVar)
-#     if (owlControl != 1 and owlControl != 2 and owlControl != 3):
-#         print('\nPlease try again.\n')
-#     if (owlControl == 0):
-#         plt.figure(figsize=(16,9))
-    
-#     elif (owlControl == 1):
-#         print('\nUsing default settings.\n')
-#         plt.figure(figsize=(12,12))
-
-#     elif (owlControl == 3):
-#         print('\nUsing double column widescreen.\n')
-#         plt.figure(figsize=(8,9))
-
-    
 #create variable to hold the effective radius of geometry used in the calculation, and a second variable to hold the labels for the data sets
 effectiveRadiusList = np.array([])
 dataSetLabels = np.array([])
-
 #now that the literature and calculated data locations have been selected by the user, the next step is to get the data corresponding to the locations the user indicated with his/her numerical input. First, do the data resulting from calculations. This will be easier than literature data, which may require the file format to be changed.
-
 #for each number corresponding to a calculation data file the user entered, identify the data file, open it, and save the data in a list in the empty list. Also save the name of the parent directory of the data to be used as a plot label. Further, save the effective radius of the data
-
 #initialize count so there will not be a crash if no calculation data is selected
 count = -1
-
 #create an array to hold the colors of the lines so they can be plotted automatically with matching colors
 colorArray = np.array([])
 kolor = np.array(['g','r','k'])
@@ -134,29 +95,23 @@ for count, p in enumerate(numberList):
             tempArrayWave = np.append(tempArrayWave,float(line.split()[1]))
             tempArrayExt = np.append(tempArrayExt,float(line.split()[2]))
     colorHolder, = plt.plot(tempArrayWave*1000,tempArrayExt*3*math.pow(10,6)/4/effectiveRadiusList[count],label=dataSetLabels[count].replace('_',' ').replace(' 2.41 nm','').replace(' 2.4 nm','')+', Calculated', linewidth=2.0, color=kolor[count])
-
     #save the color of the plot
     colorArray = np.append(colorArray, colorHolder.get_color())
-
 #now it is time to add the literature data to the plot
 for dCount, P in enumerate(litNumList):
     tempWaveArray = np.array([])
     tempExtArray = np.array([])
     dataSetLabels = np.append(dataSetLabels, litDatLines[int(P)][:-1].replace('.xls',''))
     fileName = 'literatureData/' + litDatLines[int(P)][:-1]
-
     #get the effective radius of the calculation
     #future capability: add the ability to handle several units! Add them as needed
     #if litDatLines[int(P)].rsplit
     effectiveRadiusList = np.append(effectiveRadiusList,float(litDatLines[int(P)].rsplit('_')[1]))
-
     tempFile = open(fileName,'r')
     tempLines = tempFile.readlines()
     tempFile.close()
-
     #now determine if the file is in raw format from ImageJ, or if it has been processed already
     if (tempLines[0].split()[1] == 'Mean'):
-        
         #The file is in raw format. It needs to be processed!
         for jCount, line in enumerate(tempLines):
             if (jCount > 0):
@@ -169,10 +124,8 @@ for dCount, P in enumerate(litNumList):
         for kCount, line in enumerate(tempWaveArray):
             newFile.write('{0} {1}\n'.format(tempWaveArray[kCount],tempExtArray[kCount]))
         newFile.close()
-
         #now that the file has been rewritten into a new file, remove the original file
         os.system('rm {0}'.format(fileName))
-        
     elif (tempLines[0][:-1] == 'converted file format'):
         #the file is in converted format
         for jCount, line in enumerate(tempLines):
@@ -181,7 +134,6 @@ for dCount, P in enumerate(litNumList):
                 tempExtArray = np.append(tempExtArray, line.split()[1])
     colorSuccess = 0
     #determine if this data set is being plotted with a calculated data set of the same name. If so, match the colors
-
     # :-1 returns all except the last element
     for kCounter, nameString in enumerate(dataSetLabels[:-1]):
         if (dataSetLabels[dCount+count+1].rsplit('_',1)[0].rsplit('/',1)[1] == nameString):
@@ -190,13 +142,13 @@ for dCount, P in enumerate(litNumList):
             colorSuccess = 1
     if (colorSuccess == 0):
         plt.plot(tempWaveArray, tempExtArray, label=dataSetLabels[dCount+count+1].rsplit('/',1)[1]+", Literature", marker='o', markersize=10, linestyle='none')
-        
-
 #finalize the plot!
 plotTitle = raw_input('\nEnter the desired figure file name. Extension added automatically.\n')
 plt.xlabel('Wavelength (nm)', fontsize=20)
 plt.ylabel('Extinction Normalized to Volume (1/m)', fontsize=20)
 plt.xlim(300,600)
-plt.legend(prop={'size':18},frameon=False)
+handles,labels = ax.get_legend_handles_labels()
+labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
+plt.legend(handles, labels, prop={'size':18},frameon=False)
 plt.savefig(plotTitle)
 plt.show()
