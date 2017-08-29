@@ -197,6 +197,6 @@ plotTitle = raw_input('\nEnter the desired figure file name. Extension added aut
 plt.xlabel('Wavelength (nm)', fontsize=20)
 plt.ylabel('Extinction Normalized to Volume (1/m)', fontsize=20)
 plt.xlim(300,600)
-plt.legend(prop={'size':18})
+plt.legend(prop={'size':18},frameon=False)
 plt.savefig(plotTitle)
 plt.show()
